@@ -7,6 +7,10 @@ import Loader from '@/components/Loader'
 import { ProjectCard } from '@/components/ProjectCard'
 import CreateProject from '@/components/project/CreateProject'
 
+interface DashboardParams {
+  code: string
+}
+
 const SuspendedPage = async () => {
   const payload = await getPayload({ config: configPromise })
   const { docs: projects } = await payload.find({
@@ -36,7 +40,7 @@ const SuspendedPage = async () => {
   )
 }
 
-const DashboardPage = () => {
+const DashboardPage = ({ searchParams }: { searchParams: DashboardParams }) => {
   return (
     <>
       <DynamicBreadcrumbs items={[{ label: 'Dashboard' }]} />

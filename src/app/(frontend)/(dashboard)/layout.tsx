@@ -1,6 +1,5 @@
 import configPromise from '@payload-config'
 import { headers } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { getPayload } from 'payload'
 import React, { Suspense } from 'react'
@@ -20,7 +19,8 @@ const SuspenseLayout = async ({ children }: { children: React.ReactNode }) => {
 
   // Redirecting user to sign-in if user is not signed in
   if (!user) {
-    return redirect('/sign-in')
+    // return redirect('/sign-in')
+    return <div>dashboard</div>
   }
 
   return (
