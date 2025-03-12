@@ -13,6 +13,7 @@ import { SSHKeys } from './payload/collections/SSHkeys'
 import { Servers } from './payload/collections/Servers'
 import { Services } from './payload/collections/Services'
 import { Users } from './payload/collections/Users'
+import { githubAuthCallbackpoint } from './payload/endpoints/auth'
 import { databaseUpdate } from './payload/endpoints/databaseUpdate'
 
 const filename = fileURLToPath(import.meta.url)
@@ -50,5 +51,6 @@ export default buildConfig({
       path: '/databaseUpdate',
       handler: databaseUpdate,
     },
+    githubAuthCallbackpoint,
   ],
 })

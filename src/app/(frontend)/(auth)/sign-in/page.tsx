@@ -1,7 +1,7 @@
-import SignInForm from '@/components/sign-in/SignInForm'
+import GithubLogin from '@/components/sign-in/GithubLogin'
 
 const SignInPage = () => {
-  return <SignInForm />
+  return <GithubLogin />
 }
 
 export default SignInPage
