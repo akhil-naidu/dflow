@@ -1,15 +1,35 @@
 'use client'
 
 import LayoutClient from '../layout.client'
-import { allApis, allIntroductions } from 'content-collections'
+import {
+  allDeployments,
+  allEnvironmentVariables,
+  allGettingStarteds,
+  allIntroductions,
+  allProjects,
+  allServices,
+} from 'content-collections'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-type Doc = (typeof allApis)[number] | (typeof allIntroductions)[number] // Type for a single doc
+type Doc =
+  | (typeof allGettingStarteds)[number]
+  | (typeof allProjects)[number]
+  | (typeof allEnvironmentVariables)[number]
+  | (typeof allDeployments)[number]
+  | (typeof allServices)[number]
+  | (typeof allIntroductions)[number] // Type for a single doc
 type GroupedDocs = Record<string, Doc[]> // Object where keys are categories
 
 // Combine all collections
-const allDocs: Doc[] = [...allApis, ...allIntroductions]
+const allDocs: Doc[] = [
+  ...allGettingStarteds,
+  ...allIntroductions,
+  ...allProjects,
+  ...allServices,
+  ...allEnvironmentVariables,
+  ...allDeployments,
+]
 
 // Group by category and sort categories & documents
 const groupedDocs: GroupedDocs = allDocs.reduce<GroupedDocs>((acc, doc) => {
