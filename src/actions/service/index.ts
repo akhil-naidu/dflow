@@ -33,14 +33,17 @@ import {
 const payload = await getPayload({ config: configPromise })
 
 // No need to handle try/catch that abstraction is taken care by next-safe-actions
-export const createServiceAction = publicClient
+export const createServiceAction = protectedClient
   .metadata({
     // This action name can be used for sentry tracking
     actionName: 'createServiceAction',
   })
   .schema(createServiceSchema)
-  .action(async ({ clientInput }) => {
+  .action(async ({ clientInput, ctx }) => {
     const { name, description, projectId, type, databaseType } = clientInput
+    const {
+      userTenant: { tenant },
+    } = ctx
 
     const { server } = await payload.findByID({
       collection: 'projects',
@@ -76,14 +79,15 @@ export const createServiceAction = publicClient
                 databaseDetails: {
                   type: databaseType,
                 },
+                tenant,
               },
             })
 
             if (response?.id) {
-              revalidatePath(`/dashboard/project/${projectId}`)
+              revalidatePath(`/${tenant.slug}/dashboard/project/${projectId}`)
               return {
                 success: true,
-                redirectUrl: `/dashboard/project/${projectId}/service/${response.id}`,
+                redirectUrl: `/${tenant.slug}/dashboard/project/${projectId}/service/${response.id}`,
               }
             }
           }
@@ -105,15 +109,16 @@ export const createServiceAction = publicClient
               databaseDetails: {
                 type: databaseType,
               },
+              tenant,
             },
           })
 
           if (databaseResponse.id) {
-            revalidatePath(`/dashboard/project/${projectId}`)
+            revalidatePath(`/${tenant.slug}/dashboard/project/${projectId}`)
 
             return {
               success: true,
-              redirectUrl: `/dashboard/project/${projectId}/service/${databaseResponse.id}`,
+              redirectUrl: `/${tenant.slug}/dashboard/project/${projectId}/service/${databaseResponse.id}`,
             }
           }
         }

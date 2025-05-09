@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 
 import { deleteTemplate } from '@/actions/templates'
 import { Card, CardContent } from '@/components/ui/card'
-import { Template } from '@/payload-types'
+import { Template, Tenant } from '@/payload-types'
 
 const TemplateDetails = ({ template }: { template: Template }) => {
   const { execute, isPending } = useAction(deleteTemplate, {
@@ -35,7 +35,8 @@ const TemplateDetails = ({ template }: { template: Template }) => {
         </div>
 
         <div className='flex items-center gap-3'>
-          <Link href={`/templates/compose?templateId=${template?.id}`}>
+          <Link
+            href={`/${(template?.tenant as Tenant)?.slug}/templates/compose?templateId=${template?.id}`}>
             <Button variant={'outline'}>
               <SquarePen size={20} />
             </Button>

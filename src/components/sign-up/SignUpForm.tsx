@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { slugify } from '@/lib/slugify'
 
 const SignUpForm: React.FC = () => {
   const router = useRouter()
@@ -29,6 +30,7 @@ const SignUpForm: React.FC = () => {
     resolver: zodResolver(signUpSchema),
     mode: 'onBlur',
     defaultValues: {
+      username: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -44,6 +46,7 @@ const SignUpForm: React.FC = () => {
       }
     },
     onError: ({ error }) => {
+      console.log({ error })
       toast.error(`Failed to create account: ${error.serverError}`)
     },
   })
@@ -66,6 +69,32 @@ const SignUpForm: React.FC = () => {
 
         <Form {...form}>
           <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
+            <FormField
+              control={form.control}
+              name={'username'}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={e => {
+                        e.stopPropagation()
+                        e.preventDefault()
+
+                        e.target.value = slugify(e.target.value)
+
+                        field.onChange(e)
+                      }}
+                      type='text'
+                      placeholder='john-deo'
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name={'email'}

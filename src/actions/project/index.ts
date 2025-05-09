@@ -24,10 +24,13 @@ export const createProjectAction = protectedClient
     actionName: 'createProjectAction',
   })
   .schema(createProjectSchema)
-  .action(async ({ clientInput }) => {
+  .action(async ({ clientInput, ctx }) => {
     const { name, description, serverId } = clientInput
 
     // Fetching the server details before creating the project
+    const {
+      userTenant: { tenant },
+    } = ctx
     const { version } = (await payload.findByID({
       collection: 'servers',
       id: serverId,
@@ -46,11 +49,12 @@ export const createProjectAction = protectedClient
         name,
         description,
         server: serverId,
+        tenant,
       },
     })
 
     if (response) {
-      revalidatePath('/dashboard')
+      revalidatePath(`/${tenant.slug}/dashboard`)
     }
 
     return response
@@ -62,8 +66,11 @@ export const updateProjectAction = protectedClient
     actionName: 'updateProjectAction',
   })
   .schema(updateProjectSchema)
-  .action(async ({ clientInput }) => {
+  .action(async ({ clientInput, ctx }) => {
     const { id, ...data } = clientInput
+    const {
+      userTenant: { tenant },
+    } = ctx
 
     const response = await payload.update({
       collection: 'projects',
@@ -72,7 +79,7 @@ export const updateProjectAction = protectedClient
     })
 
     if (response) {
-      revalidatePath('/dashboard')
+      revalidatePath(`/${tenant.slug}/dashboard`)
     }
 
     return response

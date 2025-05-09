@@ -68,8 +68,10 @@ interface Menu {
 const ServiceList = ({
   services,
   project,
+  organisationSlug
 }: {
   services: Service[]
+  organisationSlug: string
   project: {
     id: string
     name: string
@@ -97,7 +99,9 @@ const ServiceList = ({
 
   const onPaneClick = useCallback(() => setMenu(null), [setMenu])
   const handleRedirectToService = (id: string) => {
-    router.push(`/dashboard/project/${project.id}/service/${id}`)
+    router.push(
+      `/${organisationSlug}/dashboard/project/${projectId}/service/${id}`,
+    )
   }
 
   useEffect(() => {

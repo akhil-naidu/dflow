@@ -15,14 +15,27 @@ import {
 import { Button } from '@/components/ui/button'
 import { isDemoEnvironment } from '@/lib/constants'
 
-const SuspendedServers = () => {
+interface PageProps {
+  params: Promise<{
+    organisation: string
+  }>
+}
+const SuspendedServers = ({
+  organisationSlug,
+}: {
+  organisationSlug: string
+}) => {
   const payload = use(getPayload({ config: configPromise }))
 
   const { docs: servers } = use(
     payload.find({
       collection: 'servers',
+      where: {
+        'tenant.slug': {
+          equals: organisationSlug,
+        },
+      },
       pagination: false,
-      context: { populateServerDetails: true },
     }),
   )
 
@@ -31,7 +44,11 @@ const SuspendedServers = () => {
       {servers.length ? (
         <div className='grid gap-4 md:grid-cols-3'>
           {servers.map(server => (
-            <ServerCard server={server} key={server.id} />
+            <ServerCard
+              organisationSlug={organisationSlug}
+              server={server}
+              key={server.id}
+            />
           ))}
         </div>
       ) : (
@@ -56,17 +73,22 @@ const SuspendedServers = () => {
   )
 }
 
-const ServersPage = async () => {
+const ServersPage = async ({ params }: PageProps) => {
+  const syncParams = await params
   return (
     <LayoutClient>
       <div className='mb-5 flex items-center justify-between'>
         <div className='text-2xl font-semibold'>Servers</div>
-        <div className='flex gap-2'>
-          <RefreshButton /> {/* Use the client component here */}
-          <Suspense fallback={<CreateServerButtonSkeleton />}>
-            {isDemoEnvironment ? (
-              <Button disabled={true} size={'default'} variant={'default'}>
-                <Plus className='mr-2 h-4 w-4' />
+        <Suspense fallback={<CreateServerButtonSkeleton />}>
+          {isDemoEnvironment ? (
+            <Button disabled={true} size={'default'} variant={'default'}>
+              <Plus />
+              Add New Server
+            </Button>
+          ) : (
+            <Link href={`/${syncParams.organisation}/servers/add-new-server`}>
+              <Button size={'default'} variant={'default'}>
+                <Plus />
                 Add New Server
               </Button>
             ) : (
@@ -81,7 +103,7 @@ const ServersPage = async () => {
         </div>
       </div>
       <Suspense fallback={<ServersSkeleton />}>
-        <SuspendedServers />
+        <SuspendedServers organisationSlug={syncParams.organisation} />
       </Suspense>
     </LayoutClient>
   )

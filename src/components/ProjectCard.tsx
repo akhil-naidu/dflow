@@ -112,6 +112,7 @@ export function ProjectCard({
   project,
   servers,
   services,
+  organisationSlug,
 }: {
   project: Project
   servers: {
@@ -125,6 +126,7 @@ export function ProjectCard({
       | undefined
   }[]
   services: Service[]
+  organisationSlug: string
 }) {
   const [manualOpen, setManualOpen] = useState(false)
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false)
@@ -136,6 +138,19 @@ export function ProjectCard({
     servers.find(server => server.id === serverId)?.connection?.status ===
     'success'
 
+  return (
+    <>
+      <Link
+        href={`/${organisationSlug}/dashboard/project/${project.id}`}
+        className='h-full'>
+        <Card className='h-full min-h-36'>
+          <CardHeader className='w-full flex-row items-center justify-between'>
+            <div>
+              <CardTitle>{project.name}</CardTitle>
+              <CardDescription className='mt-1 line-clamp-1 w-3/4 text-wrap'>
+                {project.description}
+              </CardDescription>
+            </div>
   const isDisabled = !serverExists || !isServerConnected
 
   const cardContent = (

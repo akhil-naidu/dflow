@@ -12,17 +12,27 @@ export const getCloudProvidersAccountsAction = protectedClient
     actionName: 'getCloudProvidersAccountsAction',
   })
   .schema(cloudProviderAccountsSchema)
-  .action(async ({ clientInput }) => {
+  .action(async ({ clientInput, ctx }) => {
     const { type } = clientInput
+    const { userTenant } = ctx
     const payload = await getPayload({ config: configPromise })
 
     const { docs } = await payload.find({
       collection: 'cloudProviderAccounts',
       pagination: false,
       where: {
-        type: {
-          equals: type,
-        },
+        and: [
+          {
+            type: {
+              equals: type,
+            },
+          },
+          {
+            'tenant.slug': {
+              equals: userTenant.tenant?.slug,
+            },
+          },
+        ],
       },
     })
 

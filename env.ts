@@ -18,7 +18,7 @@ export const env = createEnv({
   client: {
     NEXT_PUBLIC_WEBSITE_URL: z.string().url(),
     NEXT_PUBLIC_WEBHOOK_URL: z.string().url().optional(),
-    NEXT_PUBLIC_ENVIRONMENT: z.enum(['DEMO']).optional(),
+    NEXT_PUBLIC_ENVIRONMENT: z.enum(['DEMO', 'PROD']).optional(),
     NEXT_PUBLIC_DFLOW_TELEMETRY_DISABLED: z.literal('1').optional(),
   },
   runtimeEnv: {

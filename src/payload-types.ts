@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -64,6 +65,7 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     users: User;
     projects: Project;
@@ -76,6 +78,7 @@ export interface Config {
     templates: Template;
     securityGroups: SecurityGroup;
     dockerRegistries: DockerRegistry;
+    tenants: Tenant;
     backups: Backup;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -102,6 +105,7 @@ export interface Config {
     templates: TemplatesSelect<false> | TemplatesSelect<true>;
     securityGroups: SecurityGroupsSelect<false> | SecurityGroupsSelect<true>;
     dockerRegistries: DockerRegistriesSelect<false> | DockerRegistriesSelect<true>;
+    tenants: TenantsSelect<false> | TenantsSelect<true>;
     backups: BackupsSelect<false> | BackupsSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -152,8 +156,16 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  username?: string | null;
   onboarded?: boolean | null;
   role?: ('admin' | 'user' | 'demo')[] | null;
+  tenants?:
+    | {
+        tenant: string | Tenant;
+        roles: ('tenant-admin' | 'tenant-user')[];
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -167,10 +179,23 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants".
+ */
+export interface Tenant {
+  id: string;
+  name: string;
+  slug: string;
+  subdomain: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects".
  */
 export interface Project {
   id: string;
+  tenant?: (string | null) | Tenant;
   /**
    * Enter the name of the project.
    */
@@ -184,9 +209,10 @@ export interface Project {
    */
   server: string | Server;
   services?: {
-    docs?: (string | Service)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Service)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -196,6 +222,7 @@ export interface Project {
  */
 export interface Server {
   id: string;
+  tenant?: (string | null) | Tenant;
   /**
    * Enter the name of the service.
    */
@@ -330,6 +357,7 @@ export interface Server {
  */
 export interface SshKey {
   id: string;
+  tenant?: (string | null) | Tenant;
   /**
    * Enter the name of the ssh key.
    */
@@ -349,6 +377,7 @@ export interface SshKey {
  */
 export interface CloudProviderAccount {
   id: string;
+  tenant?: (string | null) | Tenant;
   name: string;
   type: 'aws' | 'azure' | 'gcp' | 'digitalocean';
   awsDetails?: {
@@ -383,6 +412,7 @@ export interface CloudProviderAccount {
  */
 export interface SecurityGroup {
   id: string;
+  tenant?: (string | null) | Tenant;
   name: string;
   description: string;
   cloudProvider?: ('aws' | 'azure' | 'gcp' | 'digitalocean') | null;
@@ -487,6 +517,7 @@ export interface SecurityGroup {
  */
 export interface Service {
   id: string;
+  tenant?: (string | null) | Tenant;
   /**
    * Select the project associated with this service.
    */
@@ -563,9 +594,10 @@ export interface Service {
       }[]
     | null;
   deployments?: {
-    docs?: (string | Deployment)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Deployment)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -575,6 +607,7 @@ export interface Service {
  */
 export interface GitProvider {
   id: string;
+  tenant?: (string | null) | Tenant;
   type: 'github' | 'gitlab' | 'bitbucket';
   github?: {
     appName: string;
@@ -597,6 +630,7 @@ export interface GitProvider {
  */
 export interface DockerRegistry {
   id: string;
+  tenant?: (string | null) | Tenant;
   name: string;
   type: 'docker' | 'github' | 'digitalocean' | 'quay';
   username: string;
@@ -633,6 +667,7 @@ export interface Deployment {
  */
 export interface Template {
   id: string;
+  tenant?: (string | null) | Tenant;
   name: string;
   description?: string | null;
   services?:
@@ -845,6 +880,8 @@ export interface PayloadLockedDocument {
         value: string | DockerRegistry;
       } | null)
     | ({
+        relationTo: 'tenants';
+        value: string | Tenant;
         relationTo: 'backups';
         value: string | Backup;
       } | null)
@@ -899,8 +936,16 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  username?: T;
   onboarded?: T;
   role?: T;
+  tenants?:
+    | T
+    | {
+        tenant?: T;
+        roles?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -916,6 +961,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "projects_select".
  */
 export interface ProjectsSelect<T extends boolean = true> {
+  tenant?: T;
   name?: T;
   description?: T;
   server?: T;
@@ -928,6 +974,7 @@ export interface ProjectsSelect<T extends boolean = true> {
  * via the `definition` "services_select".
  */
 export interface ServicesSelect<T extends boolean = true> {
+  tenant?: T;
   project?: T;
   name?: T;
   description?: T;
@@ -998,6 +1045,7 @@ export interface ServicesSelect<T extends boolean = true> {
  * via the `definition` "servers_select".
  */
 export interface ServersSelect<T extends boolean = true> {
+  tenant?: T;
   name?: T;
   description?: T;
   sshKey?: T;
@@ -1058,6 +1106,7 @@ export interface ServersSelect<T extends boolean = true> {
  * via the `definition` "sshKeys_select".
  */
 export interface SshKeysSelect<T extends boolean = true> {
+  tenant?: T;
   name?: T;
   description?: T;
   publicKey?: T;
@@ -1070,6 +1119,7 @@ export interface SshKeysSelect<T extends boolean = true> {
  * via the `definition` "gitProviders_select".
  */
 export interface GitProvidersSelect<T extends boolean = true> {
+  tenant?: T;
   type?: T;
   github?:
     | T
@@ -1104,6 +1154,7 @@ export interface DeploymentsSelect<T extends boolean = true> {
  * via the `definition` "cloudProviderAccounts_select".
  */
 export interface CloudProviderAccountsSelect<T extends boolean = true> {
+  tenant?: T;
   name?: T;
   type?: T;
   awsDetails?:
@@ -1139,6 +1190,7 @@ export interface CloudProviderAccountsSelect<T extends boolean = true> {
  * via the `definition` "templates_select".
  */
 export interface TemplatesSelect<T extends boolean = true> {
+  tenant?: T;
   name?: T;
   description?: T;
   services?:
@@ -1196,6 +1248,7 @@ export interface TemplatesSelect<T extends boolean = true> {
  * via the `definition` "securityGroups_select".
  */
 export interface SecurityGroupsSelect<T extends boolean = true> {
+  tenant?: T;
   name?: T;
   description?: T;
   cloudProvider?: T;
@@ -1244,6 +1297,7 @@ export interface SecurityGroupsSelect<T extends boolean = true> {
  * via the `definition` "dockerRegistries_select".
  */
 export interface DockerRegistriesSelect<T extends boolean = true> {
+  tenant?: T;
   name?: T;
   type?: T;
   username?: T;
@@ -1253,6 +1307,12 @@ export interface DockerRegistriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants_select".
+ */
+export interface TenantsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  subdomain?: T;
  * via the `definition` "backups_select".
  */
 export interface BackupsSelect<T extends boolean = true> {

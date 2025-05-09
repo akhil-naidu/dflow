@@ -32,6 +32,7 @@ import LayoutClient from './layout.client'
 interface PageProps {
   params: Promise<{
     id: string
+    organisation: string
   }>
   searchParams: Promise<SearchParams>
 }
@@ -213,13 +214,21 @@ const DomainsTab = ({ server }: { server: ServerType }) => {
 }
 
 const SuspendedPage = ({ params, searchParams }: PageProps) => {
-  const { id } = use(params)
+  const { id, organisation } = use(params)
   const { tab } = use(loadServerPageTabs(searchParams))
 
   const payload = use(getPayload({ config: configPromise }))
   const [servers, server] = use(
     Promise.all([
-      payload.find({ collection: 'servers', pagination: false }),
+      payload.find({
+        collection: 'servers',
+        where: {
+          'tenant.slug': {
+            equals: organisation,
+          },
+        },
+        pagination: false,
+      }),
       payload.findByID({
         collection: 'servers',
         id,

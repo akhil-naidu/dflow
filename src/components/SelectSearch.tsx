@@ -28,6 +28,7 @@ export default function SelectSearch({
   servers,
   serverId = '',
   serviceId = '',
+  organisationSlug,
 }: {
   services?: Service[]
   projects?: { id: string; name: string }[]
@@ -36,6 +37,7 @@ export default function SelectSearch({
   servers?: Server[]
   serverId?: string
   serviceId?: string
+  organisationSlug: string
 }) {
   const id = useId()
   const [open, setOpen] = useState<boolean>(false)
@@ -70,7 +72,7 @@ export default function SelectSearch({
               <CommandGroup>
                 {projects?.map(project => (
                   <Link
-                    href={`/dashboard/project/${project.id}`}
+                    href={`/${organisationSlug}/dashboard/project/${project.id}`}
                     key={project.id}>
                     <CommandItem
                       key={project.id}
@@ -90,7 +92,7 @@ export default function SelectSearch({
 
                 {services?.map(service => (
                   <Link
-                    href={`/dashboard/project/${projectId}/service/${service.id}`}
+                    href={`/${organisationSlug}/dashboard/project/${projectId}/service/${service.id}`}
                     key={service.id}>
                     <CommandItem
                       key={service.id}
@@ -111,7 +113,9 @@ export default function SelectSearch({
                 ))}
 
                 {servers?.map(server => (
-                  <Link href={`/servers/${server.id}`} key={server.id}>
+                  <Link
+                    href={`/${organisationSlug}/servers/${server.id}`}
+                    key={server.id}>
                     <CommandItem
                       key={server.id}
                       value={server.name}

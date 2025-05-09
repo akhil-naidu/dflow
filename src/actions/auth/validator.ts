@@ -11,13 +11,13 @@ export const signInSchema = z.object({
 
 export const signUpSchema = z
   .object({
-    // username: z
-    //   .string()
-    //   .min(4, { message: 'Username must be at least 4 characters long' })
-    //   .regex(/^[a-z0-9][a-z0-9-]*[a-z0-9]$/, {
-    //     message:
-    //       'Must start and end with a lowercase letter or number, with hyphens allowed in between',
-    //   }),
+    username: z
+      .string({ message: 'Username is required' })
+      .min(4, { message: 'Username must be at least 4 characters long' })
+      .regex(/^[a-z0-9][a-z0-9-]*[a-z0-9]$/, {
+        message:
+          'Must start and end with a lowercase letter or number, with hyphens allowed in between',
+      }),
     email: z
       .string()
       .min(1, { message: 'Email is required' })

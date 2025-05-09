@@ -2,6 +2,7 @@
 
 import { useProgress } from '@bprogress/next'
 import dynamic from 'next/dynamic'
+import { useParams } from 'next/navigation'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useEffect, useState, useTransition } from 'react'
 import { createPortal } from 'react-dom'
@@ -47,6 +48,8 @@ const LayoutClient = ({
   )
 
   const [mounted, setMounted] = useState(false)
+
+  const params = useParams()
 
   useEffect(() => {
     setMounted(true)
@@ -106,6 +109,7 @@ const LayoutClient = ({
             </svg>{' '}
             {server.name}
             <SelectSearch
+              organisationSlug={params.organisation as string}
               placeholder={'server'}
               servers={servers}
               serverId={server.id}

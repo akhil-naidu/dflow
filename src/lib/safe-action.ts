@@ -1,8 +1,9 @@
 import configPromise from '@payload-config'
 import { createSafeActionClient } from 'next-safe-action'
-import { headers } from 'next/headers'
 import { getPayload } from 'payload'
 import { z } from 'zod'
+
+import { getTenant } from './get-tenant'
 
 export const publicClient = createSafeActionClient({
   defineMetadataSchema() {
@@ -24,17 +25,19 @@ const payload = await getPayload({
 })
 
 export const protectedClient = publicClient.use(async ({ next, ctx }) => {
-  const headersList = await headers()
-  const { user } = await payload.auth({ headers: headersList })
-
+  const { user, userTenant, isInTenant } = await getTenant() // Assuming getTenant() returns tenant data
   if (!user) {
     throw new Error('User not authenticated')
+  }
+  if (!isInTenant) {
+    throw new Error('User is not part of the specified tenant')
   }
 
   return next({
     ctx: {
       ...ctx,
       user,
+      userTenant,
     },
   })
 })

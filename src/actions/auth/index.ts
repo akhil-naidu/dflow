@@ -48,7 +48,7 @@ export const signInAction = publicClient
     }
 
     if (user) {
-      redirect('/dashboard')
+      redirect(`/${user.username}/dashboard`)
     }
   })
 
@@ -58,16 +58,53 @@ export const signUpAction = publicClient
   })
   .schema(signUpSchema)
   .action(async ({ clientInput }) => {
-    const { email, password } = clientInput
-    const response = await payload.create({
+    const { email, password, username } = clientInput
+
+    // Check if username already exists
+    const usernameExists = await payload.find({
       collection: 'users',
-      data: {
-        email,
-        password,
-        onboarded: false,
+      where: {
+        username: {
+          equals: username,
+        },
       },
     })
 
+    if (usernameExists.totalDocs > 0) {
+      throw new Error('Username already exists')
+    }
+
+    const emailExists = await payload.find({
+      collection: 'users',
+      where: {
+        email: {
+          equals: email,
+        },
+      },
+    })
+
+    if (emailExists.totalDocs > 0) {
+      throw new Error('Email already exists')
+    }
+
+    const tenant = await payload.create({
+      collection: 'tenants',
+      data: {
+        name: username,
+        slug: username,
+        subdomain: username,
+      },
+    })
+    const response = await payload.create({
+      collection: 'users',
+      data: {
+        username,
+        email,
+        password,
+        onboarded: false,
+        tenants: [{ tenant: tenant.id, roles: ['tenant-admin'] }],
+      },
+    })
     return response
   })
 

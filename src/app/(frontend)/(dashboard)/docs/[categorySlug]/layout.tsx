@@ -1,4 +1,4 @@
-import LayoutClient from '../layout.client'
+import LayoutClient from '../../layout.client'
 import React, { Suspense } from 'react'
 
 import { DocsSidebarSkeleton } from '@/components/skeletons/DocsSkeleton'

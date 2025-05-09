@@ -10,7 +10,16 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { isDemoEnvironment } from '@/lib/constants'
 
-const SuspendedAddNewServerPage = () => {
+interface PageProps {
+  params: Promise<{
+    organisation: string
+  }>
+}
+const SuspendedAddNewServerPage = ({
+  organisationSlug,
+}: {
+  organisationSlug: string
+}) => {
   if (isDemoEnvironment) {
     return (
       <div className='flex flex-col items-center justify-center space-y-4 p-8'>
@@ -22,7 +31,7 @@ const SuspendedAddNewServerPage = () => {
             Adding new servers is not available in the demo environment.
           </AlertDescription>
         </Alert>
-        <Link href='/servers'>
+        <Link href={`${organisationSlug}/servers`}>
           <Button variant='default'>Return to Servers</Button>
         </Link>
       </div>
@@ -33,22 +42,39 @@ const SuspendedAddNewServerPage = () => {
 
   const [{ docs: sshKeys }, { docs: securityGroups }] = use(
     Promise.all([
-      payload.find({ collection: 'sshKeys', pagination: false }),
-      payload.find({ collection: 'securityGroups', pagination: false }),
+      payload.find({
+        collection: 'sshKeys',
+        where: {
+          'tenant.slug': {
+            equals: organisationSlug,
+          },
+        },
+        pagination: false,
+      }),
+      payload.find({
+        collection: 'securityGroups',
+        where: {
+          'tenant.slug': {
+            equals: organisationSlug,
+          },
+        },
+        pagination: false,
+      }),
     ]),
   )
 
   return <ServerForm sshKeys={sshKeys} securityGroups={securityGroups} />
 }
 
-const AddNewServerPage = async () => {
+const AddNewServerPage = async ({ params }: PageProps) => {
+  const syncParams = await params
   if (isDemoEnvironment) {
     redirect('/servers')
   }
 
   return (
     <LayoutClient>
-      <SuspendedAddNewServerPage />
+      <SuspendedAddNewServerPage organisationSlug={syncParams.organisation} />
     </LayoutClient>
   )
 }

@@ -2,7 +2,7 @@
 
 import { ComingSoonBadge } from '../ComingSoonBadge'
 import { ArrowRight, ChevronLeft, Server } from 'lucide-react'
-import { usePathname, useRouter } from 'next/navigation'
+import { useParams, usePathname, useRouter } from 'next/navigation'
 import { parseAsString, useQueryState } from 'nuqs'
 import React, { useEffect, useId, useState } from 'react'
 
@@ -189,6 +189,8 @@ const ServerFormContent: React.FC<ServerFormContentProps> = ({
 }) => {
   const router = useRouter()
 
+  const { organisation } = useParams()
+
   if (!type) return null
 
   const providerName =
@@ -220,7 +222,7 @@ const ServerFormContent: React.FC<ServerFormContentProps> = ({
                 if (isOnboarding) {
                   router.push('/onboarding/dokku-install')
                 } else {
-                  router.push('/servers')
+                  router.push(`/${organisation}/servers`)
                 }
               }}
             />
@@ -233,7 +235,7 @@ const ServerFormContent: React.FC<ServerFormContentProps> = ({
                 if (isOnboarding) {
                   router.push('/onboarding/dokku-install')
                 } else {
-                  router.push('/servers')
+                  router.push(`/${organisation}/servers`)
                 }
               }}
             />

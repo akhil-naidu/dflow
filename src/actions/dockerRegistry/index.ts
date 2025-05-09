@@ -15,12 +15,21 @@ export const getDockerRegistries = protectedClient
   .metadata({
     actionName: 'getDockerRegistries',
   })
-  .action(async () => {
+  .action(async ({ ctx }) => {
     const payload = await getPayload({ config: configPromise })
-
+    const { userTenant } = ctx
     const { docs } = await payload.find({
       collection: 'dockerRegistries',
       pagination: false,
+      where: {
+        and: [
+          {
+            'tenant.slug': {
+              equals: userTenant.tenant?.slug,
+            },
+          },
+        ],
+      },
     })
 
     return docs
@@ -31,7 +40,7 @@ export const connectDockerRegistryAction = protectedClient
     actionName: 'connectDockerRegistryAction',
   })
   .schema(connectDockerRegistrySchema)
-  .action(async ({ clientInput }) => {
+  .action(async ({ clientInput, ctx }) => {
     const { password, username, type, name, id } = clientInput
     const payload = await getPayload({ config: configPromise })
 
@@ -56,6 +65,7 @@ export const connectDockerRegistryAction = protectedClient
           name,
           username,
           password,
+          tenant: ctx.userTenant.tenant,
         },
       })
     }

@@ -43,9 +43,9 @@ export const createTemplate = protectedClient
     actionName: 'createTemplate',
   })
   .schema(createTemplateSchema)
-  .action(async ({ clientInput }) => {
+  .action(async ({ clientInput, ctx }) => {
+    const { userTenant } = ctx
     const { name, description, services } = clientInput
-    console.log('in server', services)
 
     const response = await payload.create({
       collection: 'templates',
@@ -53,6 +53,7 @@ export const createTemplate = protectedClient
         name,
         description,
         services,
+        tenant: userTenant.tenant,
       },
     })
     return response
@@ -64,8 +65,9 @@ export const deleteTemplate = protectedClient
     actionName: 'deleteTemplate',
   })
   .schema(DeleteTemplateSchema)
-  .action(async ({ clientInput }) => {
+  .action(async ({ clientInput, ctx }) => {
     const { id } = clientInput
+    const { userTenant } = ctx
 
     const response = await payload.delete({
       collection: 'templates',
@@ -73,7 +75,7 @@ export const deleteTemplate = protectedClient
     })
 
     if (response) {
-      revalidatePath('/templates')
+      revalidatePath(`${userTenant.tenant.slug}/templates`)
       return { deleted: true }
     }
   })
@@ -81,13 +83,27 @@ export const deleteTemplate = protectedClient
 export const getTemplateById = protectedClient
   .metadata({ actionName: 'getTemplateById' })
   .schema(DeleteTemplateSchema)
-  .action(async ({ clientInput }) => {
+  .action(async ({ clientInput, ctx }) => {
     const { id } = clientInput
-    const response = await payload.findByID({
+    const { userTenant } = ctx
+    const response = await payload.find({
       collection: 'templates',
-      id,
+      where: {
+        and: [
+          {
+            id: {
+              equals: id,
+            },
+          },
+          {
+            'tenant.slug': {
+              equals: userTenant.tenant.slug,
+            },
+          },
+        ],
+      },
     })
-    return response
+    return response?.docs[0]
   })
 
 export const deployTemplateAction = protectedClient
@@ -95,8 +111,13 @@ export const deployTemplateAction = protectedClient
     actionName: 'deployTemplateAction',
   })
   .schema(deployTemplateSchema)
-  .action(async ({ clientInput }) => {
+  .action(async ({ clientInput, ctx }) => {
     const { id, projectId } = clientInput
+    const {
+      userTenant: { tenant },
+    } = ctx
+    const cookieStore = await cookies()
+    const payloadToken = cookieStore.get('payload-token')
 
     const projectDetails = await payload.findByID({
       collection: 'projects',
@@ -173,6 +194,7 @@ export const deployTemplateAction = protectedClient
               exposedPorts: service.databaseDetails?.exposedPorts ?? [],
             },
             project: projectDetails?.id,
+            tenant,
           },
           depth: 10,
         })
@@ -187,6 +209,7 @@ export const deployTemplateAction = protectedClient
             dockerDetails: service?.dockerDetails,
             project: projectDetails?.id,
             variables: service?.variables,
+            tenant,
           },
           depth: 10,
         })
@@ -206,6 +229,7 @@ export const deployTemplateAction = protectedClient
               providerType: service?.providerType,
               provider: service?.provider,
               builder: service?.builder,
+              tenant,
             },
             depth: 10,
           })
@@ -221,7 +245,7 @@ export const deployTemplateAction = protectedClient
     })
 
     if (response.id) {
-      revalidatePath(`/dashboard/project/${projectId}`)
+      revalidatePath(`/${tenant.slug}/dashboard/project/${projectDetails.id}`)
       return { success: true }
     }
   })
@@ -252,9 +276,15 @@ export const updateTemplate = protectedClient
 
 export const getAllTemplatesAction = protectedClient
   .metadata({ actionName: 'getAllTemplatesAction' })
-  .action(async () => {
+  .action(async ({ ctx }) => {
+    const { userTenant } = ctx
     const { docs } = await payload.find({
       collection: 'templates',
+      where: {
+        'tenant.slug': {
+          equals: userTenant.tenant.slug,
+        },
+      },
       pagination: false,
     })
 
@@ -266,7 +296,10 @@ export const deployTemplateFromArchitectureAction = protectedClient
     actionName: 'deployTemplateFromArchitectureAction',
   })
   .schema(deployTemplateFromArchitectureSchema)
-  .action(async ({ clientInput }) => {
+  .action(async ({ clientInput, ctx }) => {
+    const {
+      userTenant: { tenant },
+    } = ctx
     const { projectId, services = [] } = clientInput
 
     const projectDetails = await payload.findByID({
@@ -335,6 +368,7 @@ export const deployTemplateFromArchitectureAction = protectedClient
               exposedPorts: service.databaseDetails?.exposedPorts ?? [],
             },
             project: projectDetails?.id,
+            tenant,
           },
           depth: 10,
         })
@@ -349,6 +383,7 @@ export const deployTemplateFromArchitectureAction = protectedClient
             dockerDetails: service?.dockerDetails,
             project: projectDetails?.id,
             variables: service?.variables,
+            tenant,
           },
           depth: 10,
         })
@@ -368,6 +403,7 @@ export const deployTemplateFromArchitectureAction = protectedClient
               providerType: service?.providerType,
               provider: service?.provider,
               builder: service?.builder,
+              tenant,
             },
             depth: 10,
           })
@@ -383,7 +419,7 @@ export const deployTemplateFromArchitectureAction = protectedClient
     })
 
     if (response.id) {
-      revalidatePath(`/dashboard/project/${projectId}`)
+      revalidatePath(`/${tenant.slug}/dashboard/project/${projectDetails.id}`)
       return { success: true }
     }
   })

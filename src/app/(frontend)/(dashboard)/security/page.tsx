@@ -7,9 +7,13 @@ import ServerTerminalClient from '@/components/ServerTerminalClient'
 import SecurityTabs from '@/components/security/SecurityTabs'
 import { SecuritySkeleton } from '@/components/skeletons/SecuritySkeleton'
 
-const SuspendedPage = () => {
+interface PageProps {
+  params: Promise<{
+    organisation: string
+  }>
+}
+const SuspendedPage = ({ organisationSlug }: { organisationSlug: string }) => {
   const payload = use(getPayload({ config: configPromise }))
-
   const [
     { docs: keys, totalDocs: sshKeysCount },
     { docs: securityGroups, totalDocs: securityGroupsCount },
@@ -17,12 +21,41 @@ const SuspendedPage = () => {
     { docs: servers },
   ] = use(
     Promise.all([
-      payload.find({ collection: 'sshKeys', pagination: false }),
-      payload.find({ collection: 'securityGroups', pagination: false }),
-      payload.find({ collection: 'cloudProviderAccounts', pagination: false }),
+      payload.find({
+        collection: 'sshKeys',
+        where: {
+          'tenant.slug': {
+            equals: organisationSlug,
+          },
+        },
+        pagination: false,
+      }),
+      payload.find({
+        collection: 'securityGroups',
+        where: {
+          'tenant.slug': {
+            equals: organisationSlug,
+          },
+        },
+        pagination: false,
+      }),
+      payload.find({
+        collection: 'cloudProviderAccounts',
+        where: {
+          'tenant.slug': {
+            equals: organisationSlug,
+          },
+        },
+        pagination: false,
+      }),
       payload.find({
         collection: 'servers',
         pagination: false,
+        // where: {
+        //   'tenant.slug': {
+        //     equals: organisationSlug,
+        //   },
+        // },
         select: {
           name: true,
           sshKey: true,
@@ -49,7 +82,8 @@ const SuspendedPage = () => {
   )
 }
 
-const SecurityPage = async () => {
+const SecurityPage = async ({ params }: PageProps) => {
+  const syncParams = await params
   return (
     <LayoutClient>
       <div className='mb-8'>
@@ -60,7 +94,7 @@ const SecurityPage = async () => {
         </p>
       </div>
       <Suspense fallback={<SecuritySkeleton />}>
-        <SuspendedPage />
+        <SuspendedPage organisationSlug={syncParams?.organisation} />
       </Suspense>
     </LayoutClient>
   )

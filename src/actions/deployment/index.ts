@@ -12,15 +12,18 @@ export const createDeploymentAction = protectedClient
     actionName: 'createDeploymentAction',
   })
   .schema(createDeploymentSchema)
-  .action(async ({ clientInput }) => {
+  .action(async ({ clientInput, ctx }) => {
     const { serviceId, projectId } = clientInput
+    const {
+      userTenant: { tenant },
+    } = ctx
 
     const deploymentQueueId = await triggerDeployment({ serviceId })
 
     if (deploymentQueueId) {
       return {
         success: true,
-        redirectURL: `/dashboard/project/${projectId}/service/${serviceId}?tab=deployments`,
+        redirectURL: `/${tenant.slug}/dashboard/project/${projectId}/service/${serviceId}?tab=deployments`,
       }
     }
   })

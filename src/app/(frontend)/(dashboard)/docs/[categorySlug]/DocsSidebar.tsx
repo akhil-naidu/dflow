@@ -7,7 +7,7 @@ import {
   allServices,
 } from 'content-collections'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 
 import { isDemoEnvironment } from '@/lib/constants'
 
@@ -45,7 +45,7 @@ const sortedCategories = Object.entries(groupedDocs)
 
 const DocsSidebar = () => {
   const pathname = usePathname()
-
+  const params = useParams()
   return (
     <aside
       className={`sticky left-0 ${
@@ -59,7 +59,7 @@ const DocsSidebar = () => {
               {docs.map(doc => (
                 <li key={doc.slug} className='py-1'>
                   <Link
-                    href={`/docs/${doc.categorySlug}/${doc.slug}`}
+                    href={`/${params.organisation}/docs/${doc.categorySlug}/${doc.slug}`}
                     className={`block hover:underline ${
                       pathname === `/docs/${doc.categorySlug}/${doc.slug}`
                         ? 'font-semibold text-primary'

@@ -23,6 +23,9 @@ const nextConfig: NextConfig = {
     ]
   },
   serverExternalPackages: ['bullmq', 'ssh2', 'node-ssh'],
+  experimental: {
+    authInterrupts: true,
+  },
   webpack: (config, { isServer }) => {
     // Handle .node files
     config.module.rules.push({

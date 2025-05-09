@@ -1,5 +1,4 @@
 import configPromise from '@payload-config'
-import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
 import { Suspense } from 'react'
 
@@ -12,9 +11,9 @@ const SuspensePage = async () => {
     collection: 'users',
   })
 
-  if (totalDocs > 0) {
-    return redirect('/sign-in')
-  }
+  // if (totalDocs > 0) {
+  //   return redirect('/sign-in')
+  // }
 
   return <SignUpForm />
 }

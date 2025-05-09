@@ -9,7 +9,7 @@ import {
   useNodesState,
 } from '@xyflow/react'
 import { useAction } from 'next-safe-action/hooks'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -56,6 +56,7 @@ const CreateNewTemplate = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const templateId = searchParams.get('templateId')
+  const { organisation } = useParams()
 
   const {
     register,
@@ -82,7 +83,7 @@ const CreateNewTemplate = () => {
       onSuccess: ({ data, input }) => {
         if (data) {
           toast.success(`Template created successfully`)
-          router.push('/templates')
+          router.push(`/${organisation}/templates`)
         }
       },
       onError: ({ error }) => {
@@ -97,7 +98,7 @@ const CreateNewTemplate = () => {
     onSuccess: ({ data, input }) => {
       if (data) {
         toast.success(`Template updated successfully`)
-        router.push('/templates')
+        router.push(`/${organisation}/templates`)
       }
     },
     onError: ({ error }) => {

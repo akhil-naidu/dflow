@@ -18,21 +18,31 @@ import { ArchitectureContextProvider } from '@/providers/ArchitectureProvider'
 interface PageProps {
   params: Promise<{
     id: string
+    organisation: string
   }>
 }
 
 const SuspendedPage = ({ params }: PageProps) => {
-  const { id } = use(params)
+  const { id, organisation } = use(params)
   const payload = use(getPayload({ config: configPromise }))
 
-  const [{ docs: services }, project] = use(
+  const [{ docs: services }, { docs: Projects }] = use(
     Promise.all([
       payload.find({
         collection: 'services',
         where: {
-          project: {
-            equals: id,
-          },
+          and: [
+            {
+              project: {
+                equals: id,
+              },
+            },
+            {
+              'tenant.slug': {
+                equals: organisation,
+              },
+            },
+          ],
         },
         joins: {
           deployments: {
@@ -41,9 +51,13 @@ const SuspendedPage = ({ params }: PageProps) => {
         },
         depth: 10,
       }),
-      payload.findByID({
+      payload.find({
         collection: 'projects',
-        id,
+        where: {
+          'tenant.slug': {
+            equals: organisation,
+          },
+        },
         select: {
           name: true,
           description: true,
@@ -53,6 +67,7 @@ const SuspendedPage = ({ params }: PageProps) => {
     ]),
   )
 
+  const project = Projects.at(0)
   if (!project) {
     notFound()
   }
@@ -123,13 +138,16 @@ const SuspendedPage = ({ params }: PageProps) => {
           </Alert>
         )}
 
-        {services.length ? (
-          <ServiceList project={project} services={services} />
-        ) : (
-          <ServicesArchitecture />
-        )}
-      </section>
-    </ArchitectureContextProvider>
+      {services.length ? (
+        <ServiceList
+          organisationSlug={organisation}
+          projectId={id}
+          services={services}
+        />
+      ) : (
+        <ServicesArchitecture />
+      )}
+    </section>
   )
 }
 

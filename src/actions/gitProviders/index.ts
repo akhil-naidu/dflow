@@ -21,12 +21,25 @@ export const deleteGitProviderAction = protectedClient
     actionName: 'deleteGitProviderAction',
   })
   .schema(deleteGitProviderSchema)
-  .action(async ({ clientInput }) => {
+  .action(async ({ clientInput, ctx }) => {
     const { id } = clientInput
-
+    const { userTenant } = ctx
     const response = await payload.delete({
       collection: 'gitProviders',
-      id,
+      where: {
+        and: [
+          {
+            id: {
+              equals: id,
+            },
+          },
+          {
+            'tenant.slug': {
+              equals: userTenant.tenant?.slug,
+            },
+          },
+        ],
+      },
     })
 
     if (response) {
@@ -117,20 +130,16 @@ export const getAllAppsAction = protectedClient
   .metadata({
     actionName: 'getAllAppsAction',
   })
-  .action(async () => {
+  .action(async ({ ctx }) => {
+    const { userTenant } = ctx
     const { docs } = await payload.find({
       collection: 'gitProviders',
       pagination: false,
-      // select: {
-      //   github: {
-      //     appName: true,
-      //     installationId: true,
-      //     appUrl: true,
-      //   },
-      //   createdAt: true,
-      //   type: true,
-      //   updatedAt: true,
-      // },
+      where: {
+        'tenant.slug': {
+          equals: userTenant.tenant.slug,
+        },
+      },
     })
 
     return docs

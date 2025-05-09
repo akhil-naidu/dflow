@@ -1,5 +1,5 @@
 import configPromise from '@payload-config'
-import { headers } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
 import React, { Suspense } from 'react'
@@ -14,6 +14,8 @@ const OnboardingLayout = async ({
   children: React.ReactNode
 }) => {
   const headersList = await headers()
+  const cookiesStore = await cookies()
+  const organisationSlug = cookiesStore.get('organisation')?.value
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers: headersList })
   const { totalDocs } = await payload.count({
@@ -31,7 +33,7 @@ const OnboardingLayout = async ({
   }
 
   if (user.onboarded || totalDocs > 0) {
-    redirect('/dashboard')
+    redirect(`/${organisationSlug}/dashboard`)
   }
 
   return (

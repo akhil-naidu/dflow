@@ -108,7 +108,13 @@ export function DeleteServerAlert({
   )
 }
 
-const ServerCard = ({ server }: { server: Server }) => {
+const ServerCard = ({
+  server,
+  organisationSlug,
+}: {
+  server: Server
+  organisationSlug: string
+}) => {
   const [open, setOpen] = useState(false)
   const connectionStatus = server.connection?.status || 'unknown'
   const isConnected = connectionStatus === 'success'
@@ -120,7 +126,7 @@ const ServerCard = ({ server }: { server: Server }) => {
 
   return (
     <>
-      <Link href={`/servers/${server.id}`} className='block h-full'>
+      <Link href={`/${organisationSlug}/servers/${server.id}`} className='block h-full'>
         <Card
           className={cn(
             'h-full min-h-36 border-l-4 transition-all duration-200',

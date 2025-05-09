@@ -27,7 +27,7 @@ const ClientLayout = ({
   server: Server | string
   projects: { id: string; name: string }[]
 }) => {
-  const params = useParams<{ id: string }>()
+  const params = useParams<{ id: string; organisation: string }>()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -55,6 +55,7 @@ const ClientLayout = ({
             </Link>
 
             <SelectSearch
+              organisationSlug={params.organisation as string}
               projects={projects}
               projectId={params.id}
               placeholder='project'

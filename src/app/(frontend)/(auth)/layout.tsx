@@ -14,7 +14,7 @@ const SuspenseLayout = async ({ children }: { children: React.ReactNode }) => {
 
   // Redirecting user to sign-in if user is not signed in
   if (user) {
-    return redirect('/dashboard')
+    return redirect(`/${user.username}/dashboard`)
   }
 
   return <>{children}</>

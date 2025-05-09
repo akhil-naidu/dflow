@@ -11,7 +11,16 @@ import { DashboardSkeleton } from '@/components/skeletons/DashboardSkeletons'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Service } from '@/payload-types'
 
-const SuspendedDashboard = () => {
+interface PageProps {
+  params: Promise<{
+    organisation: string
+  }>
+}
+const SuspendedDashboard = ({
+  organisationSlug,
+}: {
+  organisationSlug: string
+}) => {
   const payload = use(getPayload({ config: configPromise }))
 
   const [serversRes, projectsRes] = use(
@@ -19,6 +28,11 @@ const SuspendedDashboard = () => {
       payload.find({
         collection: 'servers',
         pagination: false,
+        where: {
+          'tenant.slug': {
+            equals: organisationSlug,
+          },
+        },
         select: {
           name: true,
           connection: true,
@@ -26,6 +40,11 @@ const SuspendedDashboard = () => {
       }),
       payload.find({
         collection: 'projects',
+        where: {
+          'tenant.slug': {
+            equals: organisationSlug,
+          },
+        },
         pagination: false,
       }),
     ]),
@@ -94,6 +113,7 @@ const SuspendedDashboard = () => {
 
               return (
                 <ProjectCard
+                  organisationSlug={organisationSlug}
                   key={index}
                   project={project}
                   servers={servers}
@@ -125,11 +145,12 @@ const SuspendedDashboard = () => {
   )
 }
 
-const DashboardPage = () => {
+const DashboardPage = async ({ params }: PageProps) => {
+  const syncParams = await params
   return (
     <LayoutClient>
       <Suspense fallback={<DashboardSkeleton />}>
-        <SuspendedDashboard />
+        <SuspendedDashboard organisationSlug={syncParams.organisation} />
       </Suspense>
     </LayoutClient>
   )

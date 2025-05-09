@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 import React from 'react'
 
 import Tabs from '@/components/Tabs'
@@ -15,13 +15,14 @@ const LayoutClient = ({
   className?: string
 }) => {
   const pathName = usePathname()
+  const params = useParams()
 
   const tabsList = [
     { label: 'Dashboard', slug: '/dashboard' },
-    { label: 'Servers', slug: '/servers' },
-    { label: 'Security', slug: '/security' },
-    { label: 'Integrations', slug: '/integrations' },
-    { label: 'Templates', slug: '/templates' },
+    { label: 'Servers', slug: `/servers` },
+    { label: 'Security', slug: `/security` },
+    { label: 'Integrations', slug: `/integrations` },
+    { label: 'Templates', slug: `/templates` },
     { label: 'Docs', slug: '/docs/getting-started/introduction' },
   ]
 
@@ -33,7 +34,9 @@ const LayoutClient = ({
           style={{ scrollbarWidth: 'none' }}>
           <Tabs
             tabs={tabsList.map(({ label, slug }) => ({
-              label: <Link href={slug}>{label}</Link>,
+              label: (
+                <Link href={`/${params.organisation}${slug}`}>{label}</Link>
+              ),
               asChild: true,
             }))}
             defaultActiveTab={tabsList.findIndex(({ slug }) =>

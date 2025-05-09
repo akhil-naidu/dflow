@@ -7,12 +7,23 @@ import { getPayload } from 'payload'
 import TemplateDetails from '@/components/templates/TemplateDetails'
 import { Button } from '@/components/ui/button'
 
-const page = async () => {
+interface PageProps {
+  params: Promise<{ organisation: string }>
+}
+
+const page = async ({ params }: PageProps) => {
+  const syncParams = await params
   const payload = await getPayload({ config: configPromise })
 
   const { docs: templates, totalDocs } = await payload.find({
     collection: 'templates',
     pagination: false,
+    sort: '-createdAt',
+    where: {
+      'tenant.slug': {
+        equals: syncParams.organisation,
+      },
+    },
   })
 
   return (
@@ -20,7 +31,7 @@ const page = async () => {
       <section>
         <div className='flex w-full justify-between'>
           <h3 className='text-2xl font-semibold'>Templates</h3>
-          <Link href={'/templates/compose'}>
+          <Link href={`/${syncParams.organisation}/templates/compose`}>
             <Button>Create Template</Button>
           </Link>
         </div>

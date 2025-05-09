@@ -1,6 +1,6 @@
 import configPromise from '@payload-config'
 import { Github } from 'lucide-react'
-import { headers } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -25,7 +25,8 @@ const NavUserSuspended = ({ user }: { user: User }) => {
 
 const DashboardLayoutInner = () => {
   const headersList = use(headers())
-
+  const cookieStore = use(cookies())
+  const organisationSlug = cookieStore.get('organisation')?.value
   const [{ totalDocs: totalUsers }, { user }] = use(
     Promise.all([
       payload.count({
@@ -44,7 +45,9 @@ const DashboardLayoutInner = () => {
     <div className='sticky top-0 z-50 w-full bg-background'>
       <div className='mx-auto flex w-full max-w-6xl items-center justify-between p-4'>
         <div className='flex min-h-9 items-center gap-2 text-2xl font-semibold'>
-          <Link href={`/dashboard`} className='flex items-center gap-1'>
+          <Link
+            href={`/${organisationSlug}/dashboard`}
+            className='flex items-center gap-1'>
             <Image
               src='/images/dflow-no-bg.png'
               alt='dFlow-logo'

@@ -23,7 +23,10 @@ export const createSSHKeyAction = protectedClient
     actionName: 'createSSHKeyAction',
   })
   .schema(createSSHKeySchema)
-  .action(async ({ clientInput }) => {
+  .action(async ({ clientInput, ctx }) => {
+    const {
+      userTenant: { tenant },
+    } = ctx
     const { name, description, privateKey, publicKey } = clientInput
 
     const response = await payload.create({
@@ -33,11 +36,12 @@ export const createSSHKeyAction = protectedClient
         description,
         privateKey,
         publicKey,
+        tenant,
       },
     })
 
     if (response) {
-      revalidatePath('/security')
+      revalidatePath(`/${tenant.slug}/security`)
     }
 
     return response
@@ -68,8 +72,11 @@ export const deleteSSHKeyAction = protectedClient
     actionName: 'deleteSSHKeyAction',
   })
   .schema(deleteSSHKeySchema)
-  .action(async ({ clientInput }) => {
+  .action(async ({ clientInput, ctx }) => {
     const { id } = clientInput
+    const {
+      userTenant: { tenant },
+    } = ctx
 
     const response = await payload.delete({
       collection: 'sshKeys',
@@ -77,7 +84,7 @@ export const deleteSSHKeyAction = protectedClient
     })
 
     if (response) {
-      revalidatePath('/security')
+      revalidatePath(`${tenant?.slug}/security`)
       return { deleted: true }
     }
   })

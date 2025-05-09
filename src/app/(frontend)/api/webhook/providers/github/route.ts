@@ -4,10 +4,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Octokit } from 'octokit'
 import { getPayload } from 'payload'
 
+import { getTenant } from '@/lib/get-tenant'
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const headers = request.headers
-
+  const { userTenant } = await getTenant()
   const payload = await getPayload({ config: configPromise })
 
   const code = searchParams.get('code') ?? ''
@@ -58,6 +60,7 @@ export async function GET(request: NextRequest) {
           webhookSecret: data.webhook_secret ?? '',
           privateKey: data.pem,
         },
+        tenant: userTenant.tenant,
       },
     })
 
@@ -95,5 +98,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return redirect(`/integrations/?action=${action}&active=github`)
+  return redirect(
+    `/${userTenant.tenant?.slug}/integrations/?action=${action}&active=github`,
+  )
 }
