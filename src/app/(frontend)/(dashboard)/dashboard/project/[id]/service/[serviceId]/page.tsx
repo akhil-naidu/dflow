@@ -1,9 +1,8 @@
-import configPromise from '@payload-config'
 import { notFound, redirect } from 'next/navigation'
 import type { SearchParams } from 'nuqs/server'
-import { getPayload } from 'payload'
-import { Suspense, use } from 'react'
+import { Suspense } from 'react'
 
+import { getServiceDeploymentsBackups } from '@/actions/pages/service'
 import Backup from '@/components/service/Backup'
 import DeploymentList from '@/components/service/DeploymentList'
 import DomainList from '@/components/service/DomainList'
@@ -21,40 +20,16 @@ interface PageProps {
   searchParams: Promise<SearchParams>
 }
 
-const SuspendedPage = ({ params, searchParams }: PageProps) => {
-  const { serviceId } = use(params)
-  const { tab } = use(loadServicePageTabs(searchParams))
+const SuspendedPage = async ({ params, searchParams }: PageProps) => {
+  const { serviceId } = await params
+  const { tab } = await loadServicePageTabs(searchParams)
+  const serviceDetails = await getServiceDeploymentsBackups({ id: serviceId })
 
-  const payload = use(getPayload({ config: configPromise }))
-
-  const [service, { docs: deployments }, { docs: backupsDocs }] = use(
-    Promise.all([
-      payload.findByID({
-        collection: 'services',
-        id: serviceId,
-      }),
-      payload.find({
-        collection: 'deployments',
-        where: {
-          service: {
-            equals: serviceId,
-          },
-        },
-      }),
-      payload.find({
-        collection: 'backups',
-        where: {
-          service: {
-            equals: serviceId,
-          },
-        },
-      }),
-    ]),
-  )
-
-  if (!service?.id) {
+  if (!serviceDetails?.data?.service) {
     notFound()
   }
+
+  const { service, deployments, backupsDocs } = serviceDetails.data
 
   const server =
     typeof service.project === 'object' ? service.project.server : ''

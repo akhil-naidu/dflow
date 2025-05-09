@@ -1,9 +1,9 @@
-import configPromise from '@payload-config'
 import { ExternalLink, Github, Globe } from 'lucide-react'
 import Link from 'next/link'
-import { getPayload } from 'payload'
-import React, { JSX, SVGProps, Suspense, use } from 'react'
+import { notFound } from 'next/navigation'
+import React, { JSX, SVGProps, Suspense } from 'react'
 
+import { getServiceDetails } from '@/actions/pages/service'
 import SidebarToggleButton from '@/components/SidebarToggleButton'
 import {
   Docker,
@@ -44,7 +44,7 @@ const iconMapping: {
   docker: Docker,
 }
 
-const SuspendedServicePageLayout = ({
+const SuspendedServicePageLayout = async ({
   children,
   params,
 }: {
@@ -54,15 +54,14 @@ const SuspendedServicePageLayout = ({
     serviceId: string
   }>
 }) => {
-  const { serviceId } = use(params)
-  const payload = use(getPayload({ config: configPromise }))
+  const { serviceId } = await params
+  const service = await getServiceDetails({ id: serviceId })
 
-  const { project, ...serviceDetails } = use(
-    payload.findByID({
-      collection: 'services',
-      id: serviceId,
-    }),
-  )
+  if (!service?.data) {
+    return notFound()
+  }
+
+  const { project, ...serviceDetails } = service?.data
 
   const Icon =
     serviceDetails.type === 'database' && serviceDetails.databaseDetails?.type

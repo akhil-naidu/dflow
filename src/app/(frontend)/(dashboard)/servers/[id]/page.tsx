@@ -1,10 +1,12 @@
-import configPromise from '@payload-config'
 import { ScreenShareOff, TriangleAlert } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import type { SearchParams } from 'nuqs/server'
-import { getPayload } from 'payload'
 import { Suspense, use } from 'react'
 
+import {
+  getServerBreadcrumbs,
+  getServerGeneralTabDetails,
+} from '@/actions/pages/server'
 import UpdateServerForm from '@/components/servers/AttachCustomServerForm'
 import UpdateEC2InstanceForm from '@/components/servers/CreateEC2InstanceForm'
 import DomainList from '@/components/servers/DomainList'
@@ -52,45 +54,10 @@ const SSHConnectionAlert = ({ server }: { server: ServerType }) => {
 }
 
 const GeneralTab = ({ server }: { server: ServerType }) => {
-  const [{ docs: sshKeys }, { docs: projects }, { docs: securityGroups }] = use(
-    Promise.all([
-      getPayload({ config: configPromise }).then(payload =>
-        payload.find({ collection: 'sshKeys', pagination: false }),
-      ),
-      getPayload({ config: configPromise }).then(payload =>
-        payload.find({
-          collection: 'projects',
-          where: { server: { equals: server.id } },
-        }),
-      ),
-      getPayload({ config: configPromise }).then(payload =>
-        payload.find({
-          collection: 'securityGroups',
-          pagination: false,
-          where: {
-            and: [
-              {
-                or: [
-                  { cloudProvider: { equals: server.provider } },
-                  { cloudProvider: { exists: false } },
-                ],
-              },
-              {
-                or: [
-                  {
-                    cloudProviderAccount: {
-                      equals: server.cloudProviderAccount,
-                    },
-                  },
-                  { cloudProviderAccount: { exists: false } },
-                ],
-              },
-            ],
-          },
-        }),
-      ),
-    ]),
-  )
+  const generalTabDetails = use(getServerGeneralTabDetails({ id: server.id }))
+  const sshKeys = generalTabDetails?.data?.sshKeys ?? []
+  const securityGroups = generalTabDetails?.data?.securityGroups ?? []
+  const projects = generalTabDetails?.data?.projects ?? []
 
   const serverDetails = server.netdataVersion
     ? use(netdata.metrics.getServerDetails({ host: server.ip }))
@@ -215,18 +182,10 @@ const DomainsTab = ({ server }: { server: ServerType }) => {
 const SuspendedPage = ({ params, searchParams }: PageProps) => {
   const { id } = use(params)
   const { tab } = use(loadServerPageTabs(searchParams))
+  const serverDetails = use(getServerBreadcrumbs({ id }))
 
-  const payload = use(getPayload({ config: configPromise }))
-  const [servers, server] = use(
-    Promise.all([
-      payload.find({ collection: 'servers', pagination: false }),
-      payload.findByID({
-        collection: 'servers',
-        id,
-        context: { populateServerDetails: true },
-      }) as Promise<ServerType>,
-    ]),
-  )
+  const server = serverDetails?.data?.server
+  const servers = serverDetails?.data?.servers ?? []
 
   if (!server?.id) return notFound()
 
@@ -273,7 +232,7 @@ const SuspendedPage = ({ params, searchParams }: PageProps) => {
   }
 
   return (
-    <LayoutClient server={server} servers={servers.docs}>
+    <LayoutClient server={server} servers={servers}>
       {server.onboarded ? renderTab() : <ServerOnboarding server={server} />}
     </LayoutClient>
   )

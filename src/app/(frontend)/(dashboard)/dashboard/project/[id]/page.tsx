@@ -1,11 +1,10 @@
 import TabsLayout from '../../../layout.client'
-import configPromise from '@payload-config'
 import { ScreenShareOff } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getPayload } from 'payload'
-import { Suspense, use } from 'react'
+import { Suspense } from 'react'
 
+import { getProjectDetails } from '@/actions/pages/project'
 import SidebarToggleButton from '@/components/SidebarToggleButton'
 import CreateService from '@/components/service/CreateService'
 import ServiceList from '@/components/service/ServiceList'
@@ -21,41 +20,15 @@ interface PageProps {
   }>
 }
 
-const SuspendedPage = ({ params }: PageProps) => {
-  const { id } = use(params)
-  const payload = use(getPayload({ config: configPromise }))
+const SuspendedPage = async ({ params }: PageProps) => {
+  const { id } = await params
+  const projectDetails = await getProjectDetails({ id })
 
-  const [{ docs: services }, project] = use(
-    Promise.all([
-      payload.find({
-        collection: 'services',
-        where: {
-          project: {
-            equals: id,
-          },
-        },
-        joins: {
-          deployments: {
-            limit: 1,
-          },
-        },
-        depth: 10,
-      }),
-      payload.findByID({
-        collection: 'projects',
-        id,
-        select: {
-          name: true,
-          description: true,
-          server: true,
-        },
-      }),
-    ]),
-  )
-
-  if (!project) {
+  if (!projectDetails?.data?.project) {
     notFound()
   }
+
+  const { project, services } = projectDetails.data
 
   // Check if server is connected
   const isServerConnected = Boolean(

@@ -1,12 +1,10 @@
-import configPromise from '@payload-config'
 import { Github } from 'lucide-react'
-import { headers } from 'next/headers'
 import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { getPayload } from 'payload'
-import React, { Suspense, use } from 'react'
+import React, { Suspense } from 'react'
 
+import { getUserAction } from '@/actions/auth'
 import DocSidebar from '@/components/DocSidebar'
 import { HeaderBanner } from '@/components/HeaderBanner'
 import { NavUser } from '@/components/nav-user'
@@ -17,28 +15,14 @@ import { cn } from '@/lib/utils'
 import { User } from '@/payload-types'
 import Provider from '@/providers/Provider'
 
-const payload = await getPayload({ config: configPromise })
-
 const NavUserSuspended = ({ user }: { user: User }) => {
   return <NavUser user={user} />
 }
 
-const DashboardLayoutInner = () => {
-  const headersList = use(headers())
+const DashboardLayoutInner = async () => {
+  const userDetails = await getUserAction()
 
-  const [{ totalDocs: totalUsers }, { user }] = use(
-    Promise.all([
-      payload.count({
-        collection: 'users',
-
-        where: { onboarded: { equals: true } },
-      }),
-      payload.auth({ headers: headersList }),
-    ]),
-  )
-
-  if (!user) redirect('/sign-in')
-  if (!user.onboarded && totalUsers === 0) redirect('/onboarding')
+  if (!userDetails?.data) redirect('/sign-in')
 
   return (
     <div className='sticky top-0 z-50 w-full bg-background'>
@@ -79,7 +63,7 @@ const DashboardLayoutInner = () => {
           </Link>
 
           <Suspense fallback={<NavUserSkeleton />}>
-            <NavUserSuspended user={user} />
+            <NavUserSuspended user={userDetails?.data} />
           </Suspense>
         </div>
       </div>

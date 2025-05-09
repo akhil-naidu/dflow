@@ -1,10 +1,9 @@
 import LayoutClient from '../layout.client'
-import configPromise from '@payload-config'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
-import { getPayload } from 'payload'
-import { Suspense, use } from 'react'
+import { Suspense } from 'react'
 
+import { getServersDetails } from '@/actions/pages/server'
 import RefreshButton from '@/components/RefreshButton'
 import ServerTerminalClient from '@/components/ServerTerminalClient'
 import ServerCard from '@/components/servers/ServerCard'
@@ -15,16 +14,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { isDemoEnvironment } from '@/lib/constants'
 
-const SuspendedServers = () => {
-  const payload = use(getPayload({ config: configPromise }))
-
-  const { docs: servers } = use(
-    payload.find({
-      collection: 'servers',
-      pagination: false,
-      context: { populateServerDetails: true },
-    }),
-  )
+const SuspendedServers = async () => {
+  const serverDetails = await getServersDetails()
+  const servers = serverDetails?.data?.servers ?? []
 
   return (
     <>
@@ -80,6 +72,7 @@ const ServersPage = async () => {
           </Suspense>
         </div>
       </div>
+
       <Suspense fallback={<ServersSkeleton />}>
         <SuspendedServers />
       </Suspense>
