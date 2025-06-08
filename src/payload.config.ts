@@ -4,8 +4,9 @@ import { resendAdapter } from '@payloadcms/email-resend'
 import { multiTenantPlugin } from '@payloadcms/plugin-multi-tenant'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { env } from 'env'
+import { cookies } from 'next/headers'
 import path from 'path'
-import { buildConfig } from 'payload'
+import { buildConfig, getFieldsToSign, jwtSign } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
@@ -120,6 +121,64 @@ export default buildConfig({
       method: 'get',
       path: '/server-events',
       handler: serverEvents,
+    },
+    {
+      method: 'get',
+      path: '/auto-login',
+      handler: async ({ payload }) => {
+        const cookieJar = await cookies()
+        const { docs } = await payload.find({
+          collection: 'users',
+          where: {
+            email: {
+              equals: 'kaparapu.akhilnaidu@gmail.com',
+            },
+          },
+          limit: 1,
+        })
+
+        const user = docs?.[0]
+
+        const fieldsToSign = getFieldsToSign({
+          collectionConfig: Users,
+          email: 'kaparapu.akhilnaidu@gmail.com',
+          user: {
+            ...user,
+            tenants: (user?.tenants ?? [])?.map(({ id, roles, tenant }) => ({
+              id: id ?? '',
+              roles,
+              tenant: typeof tenant === 'string' ? tenant : tenant?.id,
+            })),
+            collection: 'users',
+          },
+        })
+
+        console.log({ fieldsToSign })
+
+        const response = await jwtSign({
+          fieldsToSign,
+          secret: process.env.PAYLOAD_SECRET || '',
+          tokenExpiration: 60 * 60 * 24 * 7, // 7 days
+        })
+
+        console.dir({ response }, { depth: null })
+
+        cookieJar.set('payload-token', response.token, {
+          httpOnly: false,
+          priority: 'medium',
+        })
+
+        // JWTAuthentication({
+        //   strategyName: 'auto-login',
+        //   headers: Headers(),
+        //   payload:
+        // })
+
+        return Response.json({
+          status: 'ok',
+          timestamp: new Date().toISOString(),
+        })
+      },
     },
   ],
   jobs: {

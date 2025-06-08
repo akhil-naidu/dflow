@@ -158,17 +158,6 @@ export const addRailpackDeployQueue = async (data: QueueArgs) => {
           }
         }
 
-        // Step 2: Setting environment variables & add build-args
-        if (variables.length) {
-          sendEvent({
-            message: `Stated setting environment variables`,
-            pub,
-            serverId,
-            serviceId,
-            channelId: serviceDetails.deploymentId,
-          })
-        }
-
         // Step 3: Cloning the repo
         // Generating github-app details for deployment
         sendEvent({

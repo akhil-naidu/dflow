@@ -8,7 +8,10 @@ export const getCurrentUser = async () => {
   const payload = await getPayload({
     config: configPromise,
   })
+
   const { user } = await payload.auth({ headers: headersList })
+
+  console.dir({ user, headersList }, { depth: null })
 
   return user
 }
