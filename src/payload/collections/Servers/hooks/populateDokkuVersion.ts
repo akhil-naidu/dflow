@@ -1,4 +1,3 @@
-import isPortReachable from 'is-port-reachable'
 import { CollectionAfterReadHook } from 'payload'
 
 import { server } from '@/lib/server'
@@ -23,7 +22,8 @@ export const populateDokkuVersion: CollectionAfterReadHook<Server> = async ({
   }
 
   const sshKey = typeof doc.sshKey === 'object' ? doc.sshKey : undefined
-  const portIsOpen = await isPortReachable(doc.port, { host: doc.ip })
+  // const portIsOpen = await isPortReachable(doc.port, { host: doc.ip })
+  const portIsOpen = true
 
   let dokku: string | undefined
   let netdata: string | undefined
@@ -40,6 +40,7 @@ export const populateDokkuVersion: CollectionAfterReadHook<Server> = async ({
           port: doc.port,
           privateKey: sshKey.privateKey,
           username: doc.username,
+          hostname: doc.hostname,
         })
 
         if (ssh.isConnected()) {
