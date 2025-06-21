@@ -5,20 +5,31 @@ export const dynamicSSH = async ({
   port,
   username,
   privateKey,
+  hostname,
 }: {
   host: string
   port: number
   username: string
   privateKey: string
+  hostname?: string | undefined | null
 }) => {
   const ssh = new NodeSSH()
 
-  await ssh.connect({
-    host,
-    port,
-    username,
-    privateKey,
-  })
+  console.log('ssh test', hostname, username, host)
+
+  if (hostname) {
+    await ssh.connect({
+      host: hostname,
+      username,
+    })
+  } else {
+    await ssh.connect({
+      host,
+      port,
+      username,
+      privateKey,
+    })
+  }
 
   return ssh
 }

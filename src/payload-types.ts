@@ -238,6 +238,10 @@ export interface Server {
    */
   name: string;
   /**
+   * Enter the Hostname
+   */
+  hostname?: string | null;
+  /**
    * Provide a brief description of the service.
    */
   description?: string | null;
@@ -1168,6 +1172,7 @@ export interface ServicesSelect<T extends boolean = true> {
 export interface ServersSelect<T extends boolean = true> {
   tenant?: T;
   name?: T;
+  hostname?: T;
   description?: T;
   sshKey?: T;
   ip?: T;

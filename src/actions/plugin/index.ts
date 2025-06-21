@@ -34,6 +34,7 @@ export const installPluginAction = protectedClient
       username,
       port,
       sshKey,
+      hostname,
       plugins: previousPlugins,
     } = await payload.findByID({
       collection: 'servers',
@@ -54,6 +55,7 @@ export const installPluginAction = protectedClient
       port,
       username,
       privateKey: sshKey.privateKey,
+      hostname,
     }
 
     const queueResponse = await addInstallPluginQueue({
@@ -92,6 +94,7 @@ export const syncPluginAction = protectedClient
       username,
       port,
       sshKey,
+      hostname,
       plugins: previousPlugins,
     } = await payload.findByID({
       collection: 'servers',
@@ -112,6 +115,7 @@ export const syncPluginAction = protectedClient
       port,
       username,
       privateKey: sshKey.privateKey,
+      hostname,
     }
 
     let ssh: NodeSSH | null = null
@@ -181,6 +185,7 @@ export const togglePluginStatusAction = protectedClient
       username,
       port,
       sshKey,
+      hostname,
       plugins: previousPlugins,
     } = await payload.findByID({
       collection: 'servers',
@@ -201,6 +206,7 @@ export const togglePluginStatusAction = protectedClient
       port,
       username,
       privateKey: sshKey.privateKey,
+      hostname,
     }
 
     const queueResponse = await addTogglePluginQueue({
@@ -239,6 +245,7 @@ export const deletePluginAction = protectedClient
       username,
       port,
       sshKey,
+      hostname,
       plugins: previousPlugins,
     } = await payload.findByID({
       collection: 'servers',
@@ -259,6 +266,7 @@ export const deletePluginAction = protectedClient
       port,
       username,
       privateKey: sshKey.privateKey,
+      hostname,
     }
 
     const queueResponse = await addDeletePluginQueue({
@@ -290,11 +298,13 @@ export const configureLetsencryptPluginAction = protectedClient
     const { email, autoGenerateSSL = false, serverId } = clientInput
 
     // Fetching server details instead of passing from client
-    const { id, ip, username, port, sshKey } = await payload.findByID({
-      collection: 'servers',
-      id: serverId,
-      depth: 5,
-    })
+    const { id, ip, username, port, sshKey, hostname } = await payload.findByID(
+      {
+        collection: 'servers',
+        id: serverId,
+        depth: 5,
+      },
+    )
 
     if (!id) {
       throw new Error('Server not found')
@@ -309,6 +319,7 @@ export const configureLetsencryptPluginAction = protectedClient
       port,
       username,
       privateKey: sshKey.privateKey,
+      hostname,
     }
 
     const queueResponse = await addLetsencryptPluginConfigureQueue({

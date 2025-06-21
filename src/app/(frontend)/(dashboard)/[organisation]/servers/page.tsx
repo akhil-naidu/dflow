@@ -29,6 +29,8 @@ const SuspendedServers = async ({
   const result = await getServersDetails()
   const servers = result?.data?.servers ?? []
 
+  console.log(servers)
+
   return (
     <>
       {servers.length ? (

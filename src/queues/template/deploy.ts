@@ -145,6 +145,7 @@ export const addTemplateDeployQueue = async (data: QueueArgs) => {
               host: project?.server?.ip,
               username: project?.server?.username,
               port: project?.server?.port,
+              hostname: project?.server?.hostname || undefined,
             }
 
             if (type === 'app') {

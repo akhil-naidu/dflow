@@ -81,6 +81,7 @@ export const internalBackupAction = protectedClient
         host: project?.server?.ip,
         username: project?.server?.username,
         port: project?.server?.port,
+        hostname: project?.server?.hostname || undefined,
       }
 
       const { id } = await addInternalBackupQueue({
@@ -136,6 +137,7 @@ export const internalRestoreAction = protectedClient
         host: project?.server?.ip,
         username: project?.server?.username,
         port: project?.server?.port,
+        hostname: project?.server?.hostname || undefined,
       }
 
       const { id } = await addInternalBackupQueue({
@@ -190,6 +192,7 @@ export const internalDbDeleteAction = protectedClient
         host: project?.server?.ip,
         username: project?.server?.username,
         port: project?.server?.port,
+        hostname: project?.server?.hostname || undefined,
       }
 
       const { id } = await deleteInternalBackupQueue({

@@ -35,6 +35,7 @@ export const logs: PayloadHandler = async ({ headers, payload, query }) => {
     port: serverDetails.port,
     username: serverDetails.username,
     privateKey: serverDetails.sshKey.privateKey,
+    hostname: serverDetails.hostname,
   }
 
   const encoder = new TextEncoder()

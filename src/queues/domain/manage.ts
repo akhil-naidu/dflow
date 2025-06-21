@@ -17,6 +17,7 @@ interface QueueArgs {
     host: string
     username: string
     port: number
+    hostname?: string
   }
   serviceDetails: {
     action: 'add' | 'remove' | 'set'

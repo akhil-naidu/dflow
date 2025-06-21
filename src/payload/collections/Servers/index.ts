@@ -68,6 +68,16 @@ export const Servers: CollectionConfig = {
       },
     },
     {
+      name: 'hostname',
+      type: 'text',
+      label: 'Host Name',
+      admin: {
+        description: 'Enter the Hostname',
+        placeholder: 'e.g., vmi2653744',
+      },
+      defaultValue: undefined,
+    },
+    {
       name: 'description',
       type: 'textarea',
       label: 'Description',

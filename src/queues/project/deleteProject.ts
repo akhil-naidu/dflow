@@ -86,6 +86,7 @@ export const addDeleteProjectQueue = async (data: QueueArgs) => {
             host: server?.ip,
             username: server?.username,
             port: server?.port,
+            hostname: server?.hostname || undefined,
           }
 
           sendEvent({

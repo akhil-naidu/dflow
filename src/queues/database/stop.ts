@@ -25,6 +25,7 @@ interface QueueArgs {
     host: string
     username: string
     port: number
+    hostname?: string
   }
   serviceDetails: {
     id: string

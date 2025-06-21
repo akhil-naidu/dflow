@@ -409,6 +409,7 @@ export const checkServerConnection = protectedClient
           port,
           privateKey,
           username,
+          hostname: 'vmi2666999',
         })
 
         if (ssh.isConnected()) {

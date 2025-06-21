@@ -183,6 +183,7 @@ export const deleteServiceAction = protectedClient
           host: serverDetails?.ip,
           username: serverDetails?.username,
           port: serverDetails?.port,
+          hostname: serverDetails?.hostname || undefined,
         }
 
         let queueId: string | undefined = ''
@@ -399,6 +400,7 @@ export const restartServiceAction = protectedClient
         host: project?.server?.ip,
         username: project?.server?.username,
         port: project?.server?.port,
+        hostname: project?.server?.hostname || undefined,
       }
 
       let queueId: string | undefined
@@ -476,6 +478,7 @@ export const stopServerAction = protectedClient
         host: project?.server?.ip,
         username: project?.server?.username,
         port: project?.server?.port,
+        hostname: project?.server?.hostname || undefined,
       }
 
       let queueId: string | undefined
@@ -553,6 +556,7 @@ export const exposeDatabasePortAction = protectedClient
         host: project?.server?.ip,
         username: project?.server?.username,
         port: project?.server?.port,
+        hostname: project?.server?.hostname || undefined,
       }
 
       if (type === 'database' && serviceDetails.databaseDetails?.type) {
@@ -733,6 +737,7 @@ export const regenerateSSLAction = protectedClient
         host: project?.server?.ip,
         username: project?.server?.username,
         port: project?.server?.port,
+        hostname: project?.server?.hostname || undefined,
       }
 
       const response = await addLetsencryptRegenerateQueueQueue({

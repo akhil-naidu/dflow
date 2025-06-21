@@ -30,11 +30,13 @@ export const installTerminalAction = protectedClient
     const { payload } = ctx
 
     // Fetch server details from the database
-    const { id, ip, username, port, sshKey } = await payload.findByID({
-      collection: 'servers',
-      id: serverId,
-      depth: 5,
-    })
+    const { id, ip, username, port, sshKey, hostname } = await payload.findByID(
+      {
+        collection: 'servers',
+        id: serverId,
+        depth: 5,
+      },
+    )
 
     if (!id) {
       throw new Error('Server not found')
@@ -50,6 +52,7 @@ export const installTerminalAction = protectedClient
       port,
       username,
       privateKey: sshKey.privateKey,
+      hostname,
     }
 
     // Add the job to the queue instead of executing directly
