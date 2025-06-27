@@ -1,4 +1,5 @@
 import isPortReachable from 'is-port-reachable'
+import { NodeSSH } from 'node-ssh'
 import { CollectionAfterReadHook } from 'payload'
 
 import { server } from '@/lib/server'
@@ -63,9 +64,9 @@ export const populateDokkuVersion: CollectionAfterReadHook<Server> = async ({
 
   // Step 7: Attempt SSH connection and gather server information
   if (canAttemptConnection) {
-    const ssh = await dynamicSSH(sshDetails)
-
+    let ssh: NodeSSH | null = null
     try {
+      ssh = await dynamicSSH(sshDetails)
       // Step 7c: If connected successfully, gather server information
       if (ssh.isConnected()) {
         sshConnected = true
@@ -80,17 +81,11 @@ export const populateDokkuVersion: CollectionAfterReadHook<Server> = async ({
         linuxType = serverInfo.linuxDistributionType
         railpack = serverInfo.railpackVersion
       }
-
-      // Step 7d: Clean up SSH connection
-      ssh.dispose()
     } catch (error) {
       // Step 7e: Handle connection errors gracefully
       console.log(`Connection error for ${doc.name}:`, error)
-      try {
-        ssh.dispose()
-      } catch (disposeError) {
-        console.log('Error disposing SSH connection:', disposeError)
-      }
+    } finally {
+      ssh?.dispose()
     }
   }
 
