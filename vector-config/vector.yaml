@@ -1,0 +1,14 @@
+# Place your /etc/vector/vector.yaml file here
+# 
+# 1. Create an account at Betterstack and create a Docker Source
+#
+# 2. Record your Source_Token and Ingest_URL
+#
+# 3. Generate the vector.yaml file on the server running dFLow Docker instance
+# 
+#    curl -sSL https://telemetry.betterstack.com/setup-vector/docker/<betterstack_source_token> -o /tmp/setup-vector.sh && bash /tmp/setup-vector.sh
+#
+# 4. Add to .env
+#
+#    NEXT_PUBLIC_BETTER_STACK_SOURCE_TOKEN=your-betterstack-source-token
+#    NEXT_PUBLIC_BETTER_STACK_INGESTING_URL=your-bettestack-ingest-url 
