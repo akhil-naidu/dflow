@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   payload:
@@ -9,7 +9,7 @@ services:
       - .:/home/node/app
       - node_modules:/home/node/app/node_modules
     working_dir: /home/node/app/
-    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
+    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm start"
     depends_on:
       - mongo
       # - postgres
@@ -37,7 +37,32 @@ services:
   #   ports:
   #     - "5432:5432"
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # Add vector for Betterstack logging
+  vector:
+    image: timberio/vector:latest-alpine
+    volumes:
+      - ./vector-config:/etc/vector
+      - ./vector-data:/var/lib/vector
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - '8686:8686'
+    container_name: vector
+    depends_on:
+      - payload
+      - mongo
+      - redis
+    restart: unless-stopped
+
 volumes:
   data:
   # pgdata:
   node_modules:
+  redis_data:

@@ -1,11 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { Logger } from '@logtail/next'
+import { NextFetchEvent, NextRequest, NextResponse } from 'next/server'
 
 import { DFLOW_CONFIG } from './lib/constants'
 
-export function middleware(request: NextRequest) {
+export function middleware(request: NextRequest, event: NextFetchEvent) {
   const pathname = request.nextUrl.pathname
   const hostname = request.headers.get('host') || ''
   const segments = pathname.split('/') // ['', 'acme', 'dashboard']
+
+  const logger = new Logger({ source: 'middleware' })
+  await logger.middleware(request, { logRequestDetails: ['body', 'nextUrl'] })
 
   // Check if domain is app.dflow.sh and redirect auth pages
   if (hostname === 'app.dflow.sh') {
@@ -54,6 +58,8 @@ export function middleware(request: NextRequest) {
       path: '/',
     })
   }
+
+  event.waitUntil(logger.flush())
 
   return response
 }
