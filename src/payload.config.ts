@@ -20,6 +20,7 @@ import { Deployments } from './payload/collections/Deployments'
 import { DockerRegistries } from './payload/collections/DockerRegistries'
 import { GitProviders } from './payload/collections/GitProviders'
 import { Projects } from './payload/collections/Projects'
+import { Roles } from './payload/collections/Roles'
 import { SSHKeys } from './payload/collections/SSHkeys'
 import SecurityGroups from './payload/collections/SecurityGroups'
 import { Servers } from './payload/collections/Servers'
@@ -52,6 +53,7 @@ const collectionsWithHook = addBeforeOperationHook([
   Tenants,
   Backups,
   Traefik,
+  Roles,
 ])
 
 export default buildConfig({
@@ -94,6 +96,7 @@ export default buildConfig({
         securityGroups: {},
         projects: {},
         backups: {},
+        roles: {},
       },
       userHasAccessToAllTenants: user => Boolean(user?.role?.includes('admin')),
       enabled: true,

@@ -1,6 +1,7 @@
 import { User } from '@/payload-types'
 
 import Invitation from './Invitation'
+import Roles from './Roles'
 import TeamMembers from './TeamMembers'
 
 async function TeamView({
@@ -14,6 +15,7 @@ async function TeamView({
     <div className='mt-4 space-y-10'>
       <Invitation tenant={tenant} />
       <TeamMembers teamMembers={teamMembers} />
+      <Roles teamMembers={teamMembers} />
     </div>
   )
 }

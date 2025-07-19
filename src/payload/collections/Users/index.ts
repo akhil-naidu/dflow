@@ -32,6 +32,14 @@ const defaultTenantArrayField = tenantsArrayField({
       label: 'Tenant Roles',
       required: true,
     },
+    {
+      name: 'role',
+      type: 'relationship',
+      relationTo: 'roles',
+      hasMany: false,
+      label: 'Tenant Role',
+      // required: true,
+    },
   ],
 })
 
